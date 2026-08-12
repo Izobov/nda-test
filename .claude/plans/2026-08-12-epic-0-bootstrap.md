@@ -216,11 +216,15 @@ npx lint-staged
 - [ ] **Step 5: Write `.husky/pre-push`**
 
 ```sh
-npm run lint
-npm run test:unit -- --run
+npm run lint && npm run test:unit -- --run
 ```
 
-(No Prettier-only check needed separately — `npm run lint` already runs `prettier --check .` before `eslint .`. No Playwright/Lighthouse here — too slow for a local gate, CI-only.)
+Chained with `&&`, not two separate lines — a plain shell script with no `set -e` keeps running
+past a failing line and exits with whatever the _last_ command returned, so two unchained lines
+would let a real lint failure slip through silently whenever the test suite still passes
+afterward. (No Prettier-only check needed separately — `npm run lint` already runs
+`prettier --check .` before `eslint .`. No Playwright/Lighthouse here — too slow for a local
+gate, CI-only.)
 
 - [ ] **Step 6: Verify both hooks actually run**
 
