@@ -23,3 +23,6 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 # Playwright
 test-results
+
+# Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
+.superpowers/
