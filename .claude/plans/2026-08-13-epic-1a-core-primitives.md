@@ -483,7 +483,7 @@ Expected: FAIL — `Button.svelte` does not exist yet.
 <button
 	type="button"
 	{disabled}
-	class="focus-visible:ring-primary inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 {variantClasses[
+	class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 {variantClasses[
 		variant
 	]} {sizeClasses[size]} {full ? 'w-full' : ''} {className}"
 	{...rest}
@@ -649,7 +649,7 @@ Expected: FAIL — `Input.svelte` does not exist yet.
 </script>
 
 <div class="flex flex-col gap-1.5">
-	<label for={inputId} class="text-fg text-sm font-medium">
+	<label for={inputId} class="text-sm font-medium text-fg">
 		{label}
 		{#if required}
 			<span aria-hidden="true" class="text-danger-text">*</span>
@@ -659,13 +659,13 @@ Expected: FAIL — `Input.svelte` does not exist yet.
 		id={inputId}
 		bind:value
 		{required}
-		class="border-border bg-bg text-fg placeholder:text-muted-fg focus-visible:ring-primary h-10 rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 {className}"
+		class="h-10 rounded-md border border-border bg-bg px-3 text-sm text-fg placeholder:text-muted-fg focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50 {className}"
 		aria-invalid={errorText ? 'true' : undefined}
 		aria-describedby={errorText ? errorId : undefined}
 		{...rest}
 	/>
 	{#if errorText}
-		<p id={errorId} role="alert" class="text-danger-text text-sm">{errorText}</p>
+		<p id={errorId} role="alert" class="text-sm text-danger-text">{errorText}</p>
 	{/if}
 </div>
 ```
@@ -916,7 +916,7 @@ Expected: FAIL — `Avatar.svelte` does not exist yet.
 </script>
 
 <span
-	class="bg-neutral text-neutral-fg inline-flex items-center justify-center overflow-hidden rounded-full font-medium {sizeClasses[
+	class="inline-flex items-center justify-center overflow-hidden rounded-full bg-neutral font-medium text-neutral-fg {sizeClasses[
 		size
 	]} {className}"
 >
@@ -1112,7 +1112,7 @@ Expected: FAIL — none of the four components exist yet.
 </script>
 
 <span
-	class="bg-neutral inline-block animate-pulse rounded-md {className}"
+	class="inline-block animate-pulse rounded-md bg-neutral {className}"
 	style="width: {inlineWidth}; height: {height};"
 	aria-hidden="true"
 ></span>
@@ -1140,7 +1140,7 @@ Expected: FAIL — none of the four components exist yet.
 </script>
 
 <span
-	class="bg-neutral inline-block animate-pulse rounded-md {sizeClasses[size]} {full
+	class="inline-block animate-pulse rounded-md bg-neutral {sizeClasses[size]} {full
 		? 'w-full'
 		: ''} {className}"
 	aria-hidden="true"
@@ -1158,7 +1158,7 @@ Expected: FAIL — none of the four components exist yet.
 </script>
 
 <span
-	class="bg-neutral inline-block h-5 w-14 animate-pulse rounded-full {className}"
+	class="inline-block h-5 w-14 animate-pulse rounded-full bg-neutral {className}"
 	aria-hidden="true"
 ></span>
 ```
@@ -1184,7 +1184,7 @@ Expected: FAIL — none of the four components exist yet.
 </script>
 
 <span
-	class="bg-neutral inline-block animate-pulse rounded-full {sizeClasses[size]} {className}"
+	class="inline-block animate-pulse rounded-full bg-neutral {sizeClasses[size]} {className}"
 	aria-hidden="true"
 ></span>
 ```
