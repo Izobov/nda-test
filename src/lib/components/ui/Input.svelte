@@ -20,8 +20,8 @@
 	}: Props = $props();
 
 	const uid = $props.id();
-	const inputId = id ?? `input-${uid}`;
-	const errorId = `${inputId}-error`;
+	const inputId = $derived(id ?? `input-${uid}`);
+	const errorId = $derived(`${inputId}-error`);
 </script>
 
 <div class="flex flex-col gap-1.5">
