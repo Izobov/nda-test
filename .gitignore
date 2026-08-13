@@ -23,8 +23,10 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 # Playwright
 test-results
+playwright-report/
 
 # Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
 .superpowers/
 
-.vercel
+# Local-only Claude Code settings (machine-specific permissions)
+.claude/settings.local.json
