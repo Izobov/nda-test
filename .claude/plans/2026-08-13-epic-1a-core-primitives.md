@@ -549,25 +549,28 @@ describe('Input', () => {
 
 	it('propagates typed input back through the bindable value', async () => {
 		const user = userEvent.setup();
-		// This file is `Input.svelte.test.ts`: vite-plugin-svelte's default
-		// module-infix filter (`.svelte.` + a trailing `.js`/`.ts`, with any
-		// number of extra dot-segments — e.g. `.test.` — allowed in between)
-		// matches it, so it IS compiled as a Svelte module and $state works
-		// directly here, same as in a `.svelte.ts` file.
-		let value = $state('');
+		// A plain closure variable, not $state: this assertion is a one-time
+		// snapshot read after `await user.type(...)` has already settled, not
+		// a reactive consumer (template/$derived/$effect) — so there's
+		// nothing for $state's reactivity to buy here, and Svelte's compiler
+		// correctly flags a bare $state read in that position as suspicious
+		// ("state_referenced_locally"). $bindable() only needs a real
+		// get/set accessor pair on the props object; it doesn't care whether
+		// the backing cell is reactive.
+		let currentValue = '';
 		render(Input, {
 			props: {
 				label: 'Name',
 				get value() {
-					return value;
+					return currentValue;
 				},
 				set value(v) {
-					value = v;
+					currentValue = v;
 				}
 			}
 		});
 		await user.type(screen.getByLabelText('Name'), 'Ada');
-		expect(value).toBe('Ada');
+		expect(currentValue).toBe('Ada');
 	});
 
 	it('has no error state and no aria-invalid when errorText is absent', () => {
