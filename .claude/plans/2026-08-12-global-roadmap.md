@@ -181,10 +181,33 @@ list to revisit only if a wave finishes early.
 
 ---
 
+## Progress
+
+- **Epic 0 (Bootstrap): COMPLETE.** Executed via `superpowers:subagent-driven-development`, plan
+  at `.claude/plans/2026-08-12-epic-0-bootstrap.md`. Repo scaffolded, CI green, Husky hooks, branch
+  protection live on `main` (PR + green `CI` required, 0 approvals, `enforce_admins`, no
+  force-push/deletions), `CLAUDE.md` + `.claude/settings.json` in place, Vercel deployed
+  (`nda-take-home` project). A final whole-branch review (Opus) found real gaps beyond the
+  per-task reviews — fixed in a follow-up PR: root layout now has real landmarks/skip
+  link/favicon and conflict-safe mount points for Wave 1, a vitest `client` project (jsdom) so
+  component tests actually get collected (was silently impossible before), Node 22→24 alignment
+  across CI/Vercel/`package.json`, project rename, `.gitignore`/CI hardening, and `CLAUDE.md`
+  corrections. All merged to `main`.
+- **Known open item:** the production Vercel URL only flips from the old `test-one-wine-74`
+  alias to an `nda-take-home-*` one after a fresh production deploy — recheck the live URL
+  before using it anywhere.
+
 ## Next step
 
-Before touching code: write the detailed bite-sized plan for **Epic 0** (the only epic that must
-run solo/first), confirm the branch-protection policy and repo visibility with you since those are
-remote/shared-state actions, then execute it. Waves 1+ get their detailed plans written just before
-each wave starts, not all upfront — the point of a RAW roadmap is to not over-plan epics whose
-shape may shift once Epic 0's real scaffold exists.
+Wave 1 is next: write the detailed bite-sized plans for **E1** (design tokens + primitives),
+**E1b** (composite Dialog/Combobox shell), **E2** (data layer: Zod schemas + in-memory API), and
+**E3** (observability scaffolding) — the four disjoint-file tracks called out as the best
+subagent-parallel opportunity. Each still gets its own plan written just before it starts, per
+`superpowers:writing-plans`, then dispatch via `superpowers:dispatching-parallel-agents`. Before
+starting: root `src/routes/+layout.svelte` now has real landmarks (`<header>`, `<main
+id="main-content">`, skip link, favicon) and three separated mount-point comments — E1/E1b/E3
+must only add to it, and E3 specifically replaces the `<main>` block with `<svelte:boundary>`
+wrapping `{@render children()}` rather than inserting at a bare comment (documented inline in the
+file). Also note: any `.svelte.test.ts` component test files must NOT be `+`-prefixed
+(`+layout.svelte.test.ts` breaks `svelte-kit sync`, same reservation that bit the Epic 0 e2e
+test) — name them without the `+`, e.g. `Button.svelte.test.ts`.
