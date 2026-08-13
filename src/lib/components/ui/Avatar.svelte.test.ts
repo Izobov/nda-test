@@ -33,4 +33,22 @@ describe('Avatar', () => {
 		expect(screen.getByText('AL')).toBeInTheDocument();
 		expect(screen.queryByRole('img')).not.toBeInTheDocument();
 	});
+
+	it('recovers and shows a new image after a later url replaces one that failed', async () => {
+		// Regression test: Svelte reuses component instances, so a plain
+		// `imageFailed = true` boolean would permanently lock this instance
+		// onto the initials fallback even after a valid new `url` prop
+		// arrives (e.g. a dashboard row re-rendering for a different user).
+		const { rerender } = render(Avatar, {
+			props: { url: 'https://example.com/broken.png', name: 'Ada Lovelace' }
+		});
+		await fireEvent.error(screen.getByRole('img', { name: 'Ada Lovelace' }));
+		expect(screen.getByText('AL')).toBeInTheDocument();
+
+		await rerender({ url: 'https://example.com/grace.png', name: 'Grace Hopper' });
+
+		const img = screen.getByRole('img', { name: 'Grace Hopper' });
+		expect(img).toHaveAttribute('src', 'https://example.com/grace.png');
+		expect(screen.queryByText('GH')).not.toBeInTheDocument();
+	});
 });

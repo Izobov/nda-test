@@ -1,5 +1,5 @@
 <script lang="ts">
-	type Size = 'xs' | 'sm' | 'md' | 'lg';
+	import type { Size } from './types';
 
 	interface Props {
 		path: string;

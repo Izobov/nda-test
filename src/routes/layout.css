@@ -24,8 +24,14 @@
 	--color-neutral-fg: #334155;
 }
 
+:root {
+	color-scheme: light;
+}
+
 @media (prefers-color-scheme: dark) {
 	:root {
+		color-scheme: dark;
+
 		--color-bg: #020617;
 		--color-fg: #f1f5f9;
 		--color-muted-fg: #94a3b8;
@@ -37,4 +43,9 @@
 		--color-neutral: #1e293b;
 		--color-neutral-fg: #cbd5e1;
 	}
+}
+
+body {
+	background-color: var(--color-bg);
+	color: var(--color-fg);
 }

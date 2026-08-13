@@ -2,8 +2,9 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 
+	import type { Size } from './types';
+
 	type Variant = 'primary' | 'outline';
-	type Size = 'xs' | 'sm' | 'md' | 'lg';
 
 	interface Props extends HTMLButtonAttributes {
 		variant?: Variant;
