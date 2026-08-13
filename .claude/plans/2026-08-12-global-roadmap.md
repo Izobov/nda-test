@@ -196,18 +196,50 @@ list to revisit only if a wave finishes early.
 - **Known open item:** the production Vercel URL only flips from the old `test-one-wine-74`
   alias to an `nda-take-home-*` one after a fresh production deploy — recheck the live URL
   before using it anywhere.
+- **Epic 1a (first slice of E1 — core primitives): COMPLETE.** Plan at
+  `.claude/plans/2026-08-13-epic-1a-core-primitives.md`, executed via
+  `superpowers:subagent-driven-development` (8 tasks, each with a fresh implementer + task-scoped
+  review). Shipped: `Icon`, `Button`, `Input`, `Badge`, `Avatar`, and a skeleton-loader bucket
+  (`LoaderLine`/`ButtonLoader`/`BadgeLoader`/`AvatarLoader`), backed by new Tailwind v4 `@theme`
+  tokens in `layout.css`, barrel-exported from `$lib`, 39 Vitest tests. A final whole-branch
+  review (Opus) found 3 real cross-task issues invisible to any single task's diff — fixed in one
+  wave: `Avatar`'s image-failure flag never reset on a new `url` (Svelte reuses component
+  instances, so this permanently stuck the fallback), dark mode had tokens but no page-level
+  `color-scheme`/`body` styles applied (making `text-fg` unreadable on the default white canvas),
+  and the `Size` type was duplicated verbatim across 5 files (extracted to
+  `src/lib/components/ui/types.ts`). Merged via PR #5, with three more fixes added from live
+  manual review after the PR opened: `Button` needed `cursor-pointer` (Tailwind v4's preflight
+  does not set one on `<button>` by default), `LoaderLine` now uses the same `w-full` class
+  Button uses for `full` instead of an inline style, and `Avatar`/`AvatarLoader`/`ButtonLoader`/
+  `BadgeLoader` all needed `shrink-0` — none of them had it, so stacking more than one in a
+  space-constrained flex row let the browser's flex-shrink algorithm compress width while leaving
+  height alone, visibly squashing `Avatar`'s circle into an oval (`Icon.svelte` already had this
+  guard; caught by eye in a manual local preview, not by any automated check).
+- **Epic 1a scope cut (deliberate, not done yet):** the rest of E1's primitive roster
+  (`Card`/`Select`/`Container`/`Heading`/`Toast`) and the theme-toggle UI that fills the
+  `<header>` mount point in `src/routes/+layout.svelte` were explicitly out of scope for Epic 1a
+  — noted in that plan's own scope section — and still need their own plan.
 
 ## Next step
 
-Wave 1 is next: write the detailed bite-sized plans for **E1** (design tokens + primitives),
-**E1b** (composite Dialog/Combobox shell), **E2** (data layer: Zod schemas + in-memory API), and
-**E3** (observability scaffolding) — the four disjoint-file tracks called out as the best
-subagent-parallel opportunity. Each still gets its own plan written just before it starts, per
-`superpowers:writing-plans`, then dispatch via `superpowers:dispatching-parallel-agents`. Before
-starting: root `src/routes/+layout.svelte` now has real landmarks (`<header>`, `<main
-id="main-content">`, skip link, favicon) and three separated mount-point comments — E1/E1b/E3
-must only add to it, and E3 specifically replaces the `<main>` block with `<svelte:boundary>`
-wrapping `{@render children()}` rather than inserting at a bare comment (documented inline in the
-file). Also note: any `.svelte.test.ts` component test files must NOT be `+`-prefixed
-(`+layout.svelte.test.ts` breaks `svelte-kit sync`, same reservation that bit the Epic 0 e2e
-test) — name them without the `+`, e.g. `Button.svelte.test.ts`.
+Two options for what's next, both real work: (a) finish E1's remaining roster
+(`Card`/`Select`/`Container`/`Heading`/`Toast` + the theme toggle) as an "Epic 1b-primitives"
+follow-up plan before moving on, or (b) start the other three Wave 1 tracks — **E1b** (composite
+Dialog/Combobox shell — note this is a different "1b" than the primitives follow-up above; naming
+collision to resolve when writing the plan), **E2** (data layer: Zod schemas + in-memory API),
+**E3** (observability scaffolding) — in parallel via `superpowers:dispatching-parallel-agents`,
+and pick up the remaining E1 primitives later once a composite/data-layer consumer actually needs
+one of them. Either way, each still gets its own detailed bite-sized plan written just before it
+starts, per `superpowers:writing-plans`.
+
+Before starting any of them: root `src/routes/+layout.svelte` still has its three separated
+mount-point comments (theme toggle in `<header>`, ModalHost, error-boundary) — new work must only
+add to it, and the error-boundary work specifically replaces the `<main>` block with
+`<svelte:boundary>` wrapping `{@render children()}` rather than inserting at a bare comment
+(documented inline in the file). Also carry forward: any `.svelte.test.ts` component test file
+must NOT be `+`-prefixed; new design-token additions belong in `src/routes/layout.css`'s `@theme`
+block (now with a documented light/dark split — see Epic 1a's token rationale) and the same
+`Size` type in `src/lib/components/ui/types.ts` should be reused, not redeclared, if a new
+primitive needs the `'xs' | 'sm' | 'md' | 'lg'` scale. Any new fixed-aspect visual primitive
+(icons, avatars, badges, chips) should get `shrink-0` from the start — four of Epic 1a's own
+primitives shipped without it and needed a follow-up fix once actually rendered in a row.
