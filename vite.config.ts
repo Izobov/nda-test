@@ -30,10 +30,14 @@ export default defineConfig({
 			},
 			{
 				extends: './vite.config.ts',
+				resolve: {
+					conditions: ['browser']
+				},
 				test: {
 					name: 'client',
 					environment: 'jsdom',
-					include: ['src/**/*.svelte.{test,spec}.{js,ts}']
+					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+					setupFiles: ['./src/vitest-setup-client.ts']
 				}
 			}
 		]
