@@ -17,6 +17,8 @@
 </script>
 
 <span
-	class="inline-block animate-pulse rounded-full bg-neutral {sizeClasses[size]} {className}"
+	class="inline-block shrink-0 animate-pulse rounded-full bg-neutral {sizeClasses[
+		size
+	]} {className}"
 	aria-hidden="true"
 ></span>

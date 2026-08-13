@@ -45,7 +45,7 @@
 </script>
 
 <span
-	class="inline-flex items-center justify-center overflow-hidden rounded-full bg-neutral font-medium text-neutral-fg {sizeClasses[
+	class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral font-medium text-neutral-fg {sizeClasses[
 		size
 	]} {className}"
 >

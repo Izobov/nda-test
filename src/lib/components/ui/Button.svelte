@@ -41,7 +41,7 @@
 <button
 	type="button"
 	{disabled}
-	class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 {variantClasses[
+	class="inline-flex cursor-pointer items-center justify-center rounded-md font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 {variantClasses[
 		variant
 	]} {sizeClasses[size]} {full ? 'w-full' : ''} {className}"
 	{...rest}

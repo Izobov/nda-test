@@ -7,6 +7,6 @@
 </script>
 
 <span
-	class="inline-block h-5 w-14 animate-pulse rounded-full bg-neutral {className}"
+	class="inline-block h-5 w-14 shrink-0 animate-pulse rounded-full bg-neutral {className}"
 	aria-hidden="true"
 ></span>

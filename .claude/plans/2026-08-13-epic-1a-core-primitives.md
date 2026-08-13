@@ -483,7 +483,7 @@ Expected: FAIL — `Button.svelte` does not exist yet.
 <button
 	type="button"
 	{disabled}
-	class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 {variantClasses[
+	class="inline-flex cursor-pointer items-center justify-center rounded-md font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 {variantClasses[
 		variant
 	]} {sizeClasses[size]} {full ? 'w-full' : ''} {className}"
 	{...rest}
@@ -942,7 +942,7 @@ Expected: FAIL — `Avatar.svelte` does not exist yet.
 </script>
 
 <span
-	class="inline-flex items-center justify-center overflow-hidden rounded-full bg-neutral font-medium text-neutral-fg {sizeClasses[
+	class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral font-medium text-neutral-fg {sizeClasses[
 		size
 	]} {className}"
 >
@@ -1020,23 +1020,27 @@ import { render } from '@testing-library/svelte';
 import LoaderLine from './LoaderLine.svelte';
 
 describe('LoaderLine', () => {
-	it('is decorative and pulses by default at full width', () => {
+	it('is decorative and pulses by default at full width via the w-full class', () => {
 		const { container } = render(LoaderLine, {});
 		const el = container.firstElementChild;
 		expect(el).toHaveAttribute('aria-hidden', 'true');
 		expect(el?.className).toContain('animate-pulse');
-		expect(el).toHaveStyle({ width: '100%' });
+		expect(el?.className).toContain('w-full');
+		expect(el).not.toHaveStyle({ width: expect.anything() });
 	});
 
-	it('applies an explicit width and height', () => {
+	it('applies an explicit width via inline style and height', () => {
 		const { container } = render(LoaderLine, { props: { width: '8rem', height: '0.75rem' } });
 		const el = container.firstElementChild;
+		expect(el?.className).not.toContain('w-full');
 		expect(el).toHaveStyle({ width: '8rem', height: '0.75rem' });
 	});
 
-	it('full overrides width to 100%', () => {
+	it('full overrides an explicit width back to the w-full class', () => {
 		const { container } = render(LoaderLine, { props: { width: '8rem', full: true } });
-		expect(container.firstElementChild).toHaveStyle({ width: '100%' });
+		const el = container.firstElementChild;
+		expect(el?.className).toContain('w-full');
+		expect(el).not.toHaveStyle({ width: expect.anything() });
 	});
 });
 ```
@@ -1134,12 +1138,22 @@ Expected: FAIL — none of the four components exist yet.
 
 	let { width, height = '1rem', full = false, class: className = '' }: Props = $props();
 
-	const inlineWidth = $derived(full ? '100%' : (width ?? '100%'));
+	// full and "no width given" both mean 100% — express that with the same
+	// static w-full utility Button uses for its own `full` prop, rather than
+	// an inline style, so the two primitives agree on how "full width" is
+	// spelled. A caller-supplied width still needs an inline style: Tailwind's
+	// class scanner only picks up class names that appear literally in
+	// source, so a runtime-interpolated value like `w-[{width}]` can never
+	// generate CSS at build time.
+	const useFullWidthClass = $derived(full || width === undefined);
+	const customWidth = $derived(useFullWidthClass ? undefined : width);
 </script>
 
 <span
-	class="inline-block animate-pulse rounded-md bg-neutral {className}"
-	style="width: {inlineWidth}; height: {height};"
+	class="inline-block animate-pulse rounded-md bg-neutral {useFullWidthClass
+		? 'w-full'
+		: ''} {className}"
+	style="height: {height};{customWidth ? ` width: ${customWidth};` : ''}"
 	aria-hidden="true"
 ></span>
 ```
@@ -1147,7 +1161,7 @@ Expected: FAIL — none of the four components exist yet.
 ```svelte
 <!-- src/lib/components/ui/skeleton/ButtonLoader.svelte -->
 <script lang="ts">
-	type Size = 'xs' | 'sm' | 'md' | 'lg';
+	import type { Size } from '../types';
 
 	interface Props {
 		size?: Size;
@@ -1166,9 +1180,9 @@ Expected: FAIL — none of the four components exist yet.
 </script>
 
 <span
-	class="inline-block animate-pulse rounded-md bg-neutral {sizeClasses[size]} {full
+	class="inline-block animate-pulse rounded-md bg-neutral {full
 		? 'w-full'
-		: ''} {className}"
+		: 'shrink-0'} {sizeClasses[size]} {className}"
 	aria-hidden="true"
 ></span>
 ```
@@ -1184,7 +1198,7 @@ Expected: FAIL — none of the four components exist yet.
 </script>
 
 <span
-	class="inline-block h-5 w-14 animate-pulse rounded-full bg-neutral {className}"
+	class="inline-block h-5 w-14 shrink-0 animate-pulse rounded-full bg-neutral {className}"
 	aria-hidden="true"
 ></span>
 ```
@@ -1192,7 +1206,7 @@ Expected: FAIL — none of the four components exist yet.
 ```svelte
 <!-- src/lib/components/ui/skeleton/AvatarLoader.svelte -->
 <script lang="ts">
-	type Size = 'xs' | 'sm' | 'md' | 'lg';
+	import type { Size } from '../types';
 
 	interface Props {
 		size?: Size;
@@ -1210,7 +1224,9 @@ Expected: FAIL — none of the four components exist yet.
 </script>
 
 <span
-	class="inline-block animate-pulse rounded-full bg-neutral {sizeClasses[size]} {className}"
+	class="inline-block shrink-0 animate-pulse rounded-full bg-neutral {sizeClasses[
+		size
+	]} {className}"
 	aria-hidden="true"
 ></span>
 ```
