@@ -644,8 +644,8 @@ Expected: FAIL — `Input.svelte` does not exist yet.
 	}: Props = $props();
 
 	const uid = $props.id();
-	const inputId = id ?? `input-${uid}`;
-	const errorId = `${inputId}-error`;
+	const inputId = $derived(id ?? `input-${uid}`);
+	const errorId = $derived(`${inputId}-error`);
 </script>
 
 <div class="flex flex-col gap-1.5">
@@ -862,6 +862,24 @@ describe('Avatar', () => {
 		expect(screen.getByText('AL')).toBeInTheDocument();
 		expect(screen.queryByRole('img')).not.toBeInTheDocument();
 	});
+
+	it('recovers and shows a new image after a later url replaces one that failed', async () => {
+		// Regression test: Svelte reuses component instances, so a plain
+		// `imageFailed = true` boolean would permanently lock this instance
+		// onto the initials fallback even after a valid new `url` prop
+		// arrives (e.g. a dashboard row re-rendering for a different user).
+		const { rerender } = render(Avatar, {
+			props: { url: 'https://example.com/broken.png', name: 'Ada Lovelace' }
+		});
+		await fireEvent.error(screen.getByRole('img', { name: 'Ada Lovelace' }));
+		expect(screen.getByText('AL')).toBeInTheDocument();
+
+		await rerender({ url: 'https://example.com/grace.png', name: 'Grace Hopper' });
+
+		const img = screen.getByRole('img', { name: 'Grace Hopper' });
+		expect(img).toHaveAttribute('src', 'https://example.com/grace.png');
+		expect(screen.queryByText('GH')).not.toBeInTheDocument();
+	});
 });
 ```
 
@@ -888,7 +906,12 @@ Expected: FAIL — `Avatar.svelte` does not exist yet.
 
 	let { url, name, size = 'md', class: className = '' }: Props = $props();
 
-	let imageFailed = $state(false);
+	// Track *which* url failed, not a plain boolean: Svelte reuses component
+	// instances, so a stale `imageFailed = true` would permanently lock this
+	// instance onto the fallback even after a later, valid `url` prop arrives
+	// (e.g. a dashboard row re-rendering with a different user). Comparing
+	// against the current `url` self-heals the moment the prop changes.
+	let failedUrl = $state<string | undefined>(undefined);
 
 	const sizeClasses: Record<Size, string> = {
 		xs: 'size-6 text-[10px]',
@@ -911,7 +934,7 @@ Expected: FAIL — `Avatar.svelte` does not exist yet.
 		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 	}
 
-	const showImage = $derived(Boolean(url) && !imageFailed);
+	const showImage = $derived(Boolean(url) && failedUrl !== url);
 	const computedInitials = $derived(name ? initials(name) : '');
 </script>
 
@@ -925,7 +948,7 @@ Expected: FAIL — `Avatar.svelte` does not exist yet.
 			src={url}
 			alt={name ?? ''}
 			class="size-full object-cover"
-			onerror={() => (imageFailed = true)}
+			onerror={() => (failedUrl = url)}
 		/>
 	{:else if computedInitials}
 		{computedInitials}
@@ -1108,7 +1131,7 @@ Expected: FAIL — none of the four components exist yet.
 
 	let { width, height = '1rem', full = false, class: className = '' }: Props = $props();
 
-	const inlineWidth = full ? '100%' : (width ?? '100%');
+	const inlineWidth = $derived(full ? '100%' : (width ?? '100%'));
 </script>
 
 <span
