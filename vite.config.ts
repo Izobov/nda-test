@@ -30,6 +30,9 @@ export default defineConfig({
 			},
 			{
 				extends: './vite.config.ts',
+				resolve: {
+					conditions: ['browser']
+				},
 				test: {
 					name: 'client',
 					environment: 'jsdom',
