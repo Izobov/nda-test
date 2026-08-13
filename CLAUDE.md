@@ -11,8 +11,8 @@ against the rubric verbatim, not against "reasonable effort."
 
 ## Non-negotiable architecture decisions (do not re-litigate)
 
-- **No database, no Supabase.** `mocks/*.json` is the entire data layer, read server-side in
-  `load`/actions as if it were a real API (per `mocks/README.md`). Never call it directly from
+- **No database, no Supabase.** `task/mocks/*.json` is the entire data layer, read server-side in
+  `load`/actions as if it were a real API (per `task/mocks/README.md`). Never call it directly from
   client code.
 - **Auth = stateless signed cookie**, not a session table. Verify `users.json` password
   server-side, sign `{userId, role, exp}` with Web Crypto (HMAC), set httpOnly/secure/sameSite
@@ -22,8 +22,9 @@ against the rubric verbatim, not against "reasonable effort."
   - `/`, `/blog`, `/blog/[slug]`, `/en/*`, `/de/*` → **prerendered (SSG)** via `export const
 prerender = true` + explicit `entries()` returning every `{slug}` (× `{lang}`) from
     `posts.json`. Content changes = edit JSON + redeploy (no CMS exists, so this _is_ the
-    content-update path). ISR is the named-but-not-implemented upgrade path if data ever moved to
-    a live CMS — say this on the defense call, don't build it speculatively.
+    content-update path). ISR is the natural upgrade path if data ever moved to a live CMS; not
+    implemented here because this project's data source doesn't need it — a deliberate,
+    defensible scope cut, not an oversight.
   - **Edge** runtime → the `handle` hook / guard verifying the signed cookie for
     `/dashboard/**`, and `/search`.
   - **Node** runtime → `/dashboard/items` + its form actions.
@@ -38,6 +39,17 @@ prerender = true` + explicit `entries()` returning every `{slug}` (× `{lang}`) 
 - **Component variant API:** explicit typed props (e.g. `variant`, `size`), not classname-merge
   helpers. `<Button variant="primary" size="xs">` — readable and greppable — not a `cn()`-style
   utility resolving conflicting classes at runtime.
+- **Root layout mount points are add-only.** `src/routes/+layout.svelte` reserves mount points for
+  the theme toggle (Epic 1), ModalHost (Epic 1b), and the error boundary (Epic 3). This is the one
+  shared-file risk across Wave 1's four parallel epics, so each epic **adds to** its own mount
+  point and does not restructure the file. One documented exception: `<svelte:boundary>` must wrap
+  content, so Epic 3 necessarily replaces the `<main>` block rather than inserting at a comment —
+  that specific edit is expected, and the comment in the file says so.
+- **`test.passWithNoTests: true` in `vite.config.ts` is a deliberate bootstrap setting** for the
+  window where zero test files exist. It does **not** mean tests are optional: the moment Epic 1
+  adds real test files it becomes inert for those projects. It must never be used to mask a vitest
+  project whose `include` pattern silently matches nothing — if a project reports success while
+  collecting zero files you did not expect to be empty, fix the pattern, don't lean on this flag.
 
 ## Process rules
 
@@ -47,14 +59,21 @@ prerender = true` + explicit `entries()` returning every `{slug}` (× `{lang}`) 
   squash-to-one-commit submission — commit history is graded.
 - **Ambiguity → make a call, document it, move on.** Do not stop to ask the hiring team. Be ready
   to defend the call on the 45-minute follow-up.
-- Pre-commit (Husky) = lint-staged, fast. Pre-push = full lint + unit tests. CI = lint → typecheck
-  → unit → build → Playwright → Lighthouse CI → bundle-size, in that order, blocking on any
-  regression.
-- `main` is protected: PR + green `CI` status check required, no direct pushes, no force-push.
+- Pre-commit (Husky) = lint-staged, fast. Pre-push = full lint + unit tests.
+- **CI, target pipeline order:** lint → typecheck → unit → build → Playwright → Lighthouse CI →
+  bundle-size, blocking on any regression. **Currently only the first four stages exist** in
+  `.github/workflows/ci.yml`; Playwright, Lighthouse CI, and bundle-size land in Epics 9/10 per
+  the roadmap. Treat the full list as the destination, not a description of the present state.
+- `main` is protected: PR + green `CI` status check required, no direct pushes, no force-push, no
+  branch deletion. Specifically: **0 required approvals** (solo project — don't wait for a review
+  that will never come), `enforce_admins: true` (nobody bypasses the rules, including the repo
+  owner), and `strict: true` (the branch must be up to date with `main` before it can merge).
   Applied once Epic 0's first CI run goes green, and confirmed working before Epic 0's own
   app-shell change (root layout, placeholder home page) — that change is the first real PR.
+- **Never merge a pull request automatically.** An agent's job ends at: push the branch, open the
+  PR, confirm CI is green, report the URL. The user merges every PR themselves, without exception.
 
-## Grading rubric (verbatim weights — optimize allocation of effort accordingly)
+## Grading rubric (verbatim weights, reproduced here for reference)
 
 | Area                                | Weight |
 | ----------------------------------- | ------ |
@@ -79,7 +98,7 @@ production-grade beats a sprawling demo that's 80% there everywhere." — spec, 
   `/dashboard/items` — **enforced in CI**, not just measured.
 - Lighthouse Perf/A11y/SEO/Best-Practices ≥ 95, CI-blocking.
 - JS budget via `size-limit`: ≤80KB gzip public surface, ≤150KB dashboard — enforced.
-- Zod schemas (not OpenAPI) as single source of truth, derived from `mocks/schemas.json`.
+- Zod schemas (not OpenAPI) as single source of truth, derived from `task/mocks/schemas.json`.
   Validate `posts.json`/`items.json`/`users.json` at the boundary. Shared client+server
   validation schema. Loaders vs actions clearly distinguished; mutations invalidate only the
   relevant loader. Network/validation/401/403 errors each render and recover differently.
@@ -108,12 +127,12 @@ Public GitHub repo URL + live deployed URL (dashboard reachable behind demo logi
 (run locally, run tests, demo credentials) + green CI on `main` at submission time, sent as a
 reply with approximate time spent and talking points, ahead of a 45-minute defense call.
 
-## Demo credentials (from `mocks/README.md`, password `demo1234` for all)
+## Demo credentials (from `task/mocks/README.md`, password `demo1234` for all)
 
 `admin@demo.test` (full access), `editor@demo.test` (can edit dashboard rows), `viewer@demo.test`
 (read-only — use to test authorization boundaries).
 
-## What may / may not change in `mocks/`
+## What may / may not change in `task/mocks/`
 
 May extend (add fields, note it in README; translate more strings; regenerate more rows). May
 **not** change: `users.json` shape, `posts.json` `id`/`slug` fields.

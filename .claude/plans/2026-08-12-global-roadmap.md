@@ -112,7 +112,7 @@ Wave 6  [solo, sequential, last]
 ### Parallelization notes for subagents
 
 - **Wave 1** is the best subagent-parallel opportunity: 4 independent tracks touching disjoint
-  files (`tailwind.config.*`/`src/lib/components/*`, `src/lib/schemas/*`+`src/lib/server/data/*`,
+  files (`src/routes/layout.css` (`@theme` block)/`src/lib/components/*`, `src/lib/schemas/*`+`src/lib/server/data/*`,
   `src/lib/observability/*`). Dispatch 4 subagents via `superpowers:dispatching-parallel-agents`.
   Only shared risk: root `+layout.svelte` (theme toggle, ModalHost, error boundary mount point) —
   reserve that file for E0 to stub out so E1/E1b/E3 only _add_ to it, not restructure it.
