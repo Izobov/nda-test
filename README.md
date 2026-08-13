@@ -2,7 +2,7 @@
 
 Senior frontend take-home submission (`task/take-home-senior-frontend-sveltekit.html`).
 
-**Live:** https://nda-take-home.vercel.app
+**Live:** https://test-one-wine-74.vercel.app
 **Repo:** https://github.com/Izobov/nda-test
 
 ## AI disclosure
@@ -41,7 +41,7 @@ implementation is next.
 
 ## Tests
 
-**79 / 79 passing** across 18 test files (`npm run test:unit -- --run`). Strict TDD throughout —
+**88 / 88 passing** across 20 test files (`npm run test:unit -- --run`). Strict TDD throughout —
 every test was written and confirmed failing before its implementation. No skipped or pending
 tests.
 
